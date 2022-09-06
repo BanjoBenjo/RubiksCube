@@ -2,20 +2,74 @@ import './style.css'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import * as lil from 'lil-gui'
-
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { generateUUID } from 'three/src/math/MathUtils'
 
 /**
  * Debug
  */
  const gui = new lil.GUI()
 
- const parameters = {
-     spin: () => 
-     {
-         gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 0.5  })
-     }
+ let parameters = {
+    spinTop: () => 
+    {
+        let group = assembleLayer('top')
+        spinY(group, -1)
+    },
+    spinTopInv: () => 
+    {
+        let group = assembleLayer('top')
+        spinY(group, 1)
+    },
+    spinBot: () => 
+    {
+        let group = assembleLayer('bot')
+        spinY(group, 1)
+    },
+    spinBotInv: () => 
+    {
+        let group = assembleLayer('bot')
+        spinY(group, -1)
+    },
+    spinLeft: () => 
+    {
+        let group = assembleLayer('left')
+        spinX(group, 1)
+    },
+    spinLeftInv: () => 
+    {
+       let group = assembleLayer('left')
+       spinX(group, -1)
+    },
+    spinRight: () => 
+    {
+        let group = assembleLayer('right')
+        spinX(group, 1)  
+    },
+    spinRightInv: () => 
+    {
+        let group = assembleLayer('right')
+        spinX(group, -1) 
+    },
+    spinFront: () => 
+    {
+       let group = assembleLayer('front')
+       spinZ(group, 1)
+    },
+    spinFrontInv: () => 
+    {
+       let group = assembleLayer('front')
+       spinZ(group, -1)
+    },
+    spinBack: () => 
+    {
+       let group = assembleLayer('back')
+       spinZ(group, 1)
+    },
+    spinBackInv: () => 
+    {
+       let group = assembleLayer('back')
+       spinZ(group, -1)
+    },
  }
 
 /**
@@ -30,13 +84,7 @@ const scene = new THREE.Scene()
 /**
  * Objects
  */
-
 // create all 26 cubes
-const rubiksCube = new THREE.Group();
-
-scene.add(rubiksCube)
-
-
 const createPieces = () => 
 {
     let piecesArray = [] // cubes with plates attached in group
@@ -44,40 +92,34 @@ const createPieces = () =>
 
     for (let x=0; x <= 26; x++)
     {
+        let group = new THREE.Group()
+
         const cube = new THREE.Mesh(
             new THREE.BoxGeometry(0.9, 0.9, 0.9),
             rubiksMaterial
         )
-        cube.name = x
-    
-        cube.position.x = (x % 3) -1
-        cube.position.y = Math.floor(x / 9) -1
-        cube.position.z = Math.floor(x / 3) % 3 -1
-    
-        const group = addPlates(cube)
-    
+        
+        const xIndex = (x % 3) -1
+        const yIndex = Math.floor(x / 9) -1
+        const zIndex = Math.floor(x / 3) % 3 -1
+
+        group.add(cube)
+        group = addPlates(group, xIndex, yIndex, zIndex)    
+        
+        group.name = x
+        group.position.x = xIndex
+        group.position.y = yIndex
+        group.position.z = zIndex
+
         piecesArray[x] = group
     }
-
-    // Debug
-    gui.addColor(rubiksMaterial, 'color')
-        .name('Rubiks Color')
     return piecesArray
 }
 
-const addPlates = (cube) => {
-    const group = new THREE.Group()
-    group.add(cube)
-
-    const xIndex = cube.position.x
-    const yIndex = cube.position.y
-    const zIndex = cube.position.z
-
-    // if (yIndex === 1) { group.add( createYellowPlate(cube) ) }
+const addPlates = (group, xIndex, yIndex, zIndex) => {    
     if (yIndex === 1){   
         group.add( 
             createPlate({
-                cube: cube, 
                 geometry: new THREE.BoxGeometry(0.8, 0.1, 0.8),
                 color: 0xf6d32d,   
                 side: 'top' })
@@ -86,7 +128,6 @@ const addPlates = (cube) => {
     if (yIndex === -1){   
         group.add( 
             createPlate({
-                cube: cube, 
                 geometry: new THREE.BoxGeometry(0.8, 0.1, 0.8),
                 color: 0xEDEDED,   
                 side: 'bot' })
@@ -95,7 +136,6 @@ const addPlates = (cube) => {
     if (xIndex === 1){   
         group.add( 
             createPlate({
-                cube: cube, 
                 geometry: new THREE.BoxGeometry(0.1, 0.8, 0.8),
                 color: 0x3584e4,   
                 side: 'right' })
@@ -104,7 +144,6 @@ const addPlates = (cube) => {
     if (xIndex === -1){   
         group.add( 
             createPlate({
-                cube: cube, 
                 geometry: new THREE.BoxGeometry(0.1, 0.8, 0.8),
                 color: 0x26a269,   
                 side: 'left' })
@@ -113,7 +152,6 @@ const addPlates = (cube) => {
     if (zIndex === -1){   
         group.add( 
             createPlate({
-                cube: cube, 
                 geometry: new THREE.BoxGeometry(0.8, 0.8, 0.1),
                 color: 0xff7800,   
                 side: 'front' })
@@ -122,7 +160,6 @@ const addPlates = (cube) => {
     if (zIndex === 1){   
         group.add( 
             createPlate({
-                cube: cube, 
                 geometry: new THREE.BoxGeometry(0.8, 0.8, 0.1),
                 color: 0xe01b24,   
                 side: 'back' })
@@ -132,43 +169,158 @@ const addPlates = (cube) => {
     return group 
 }
 
-const createPlate = ({cube, geometry, color, side}) => {
+const createPlate = ({ geometry, color, side}) => {
     const plane = new THREE.Mesh
     (
         geometry,
         new THREE.MeshBasicMaterial({ color: color })
     )
 
-    plane.position.x = cube.position.x
-    plane.position.y = cube.position.y
-    plane.position.z = cube.position.z
-
-    if (side === 'top')     { plane.position.y = 1.5}
-    if (side === 'bot')     { plane.position.y = -1.5}
-    if (side === 'left')    { plane.position.x = -1.5}
-    if (side === 'right')   { plane.position.x = 1.5}
-    if (side === 'front')   { plane.position.z = 1.5}
-    if (side === 'back')    { plane.position.z = -1.5 }
+    if (side === 'top')     { plane.position.y = 0.5}
+    if (side === 'bot')     { plane.position.y = -0.5}
+    if (side === 'left')    { plane.position.x = -0.5}
+    if (side === 'right')   { plane.position.x = 0.5}
+    if (side === 'back')    { plane.position.z = 0.5}
+    if (side === 'front')   { plane.position.z = -0.5 }
     return plane
 }
 
 // Debug
-
-
-const piecesArray = createPieces()
-
-
-piecesArray.forEach((piece)=>{rubiksCube.add(piece);})
-
-// Debug
-// gui.add(plane.position, 'x').min(-2).max(2).step(0.01)
-// gui.add(plane.position, 'y').min(-2).max(2).step(0.01)
-// gui.add(plane.position, 'z').min(-2).max(2).step(0.01)
+let piecesArray = createPieces()
+for (let i=0; i <= 26; i++)
+{
+    scene.add(piecesArray[i])
+}
 
 
 // Helper
 const helper = new THREE.AxesHelper(2)
 scene.add(helper)
+
+
+/**
+ * Update Moveable Groups
+ */
+ const assembleLayer = (side) => {
+    let layer = []
+    console.log(piecesArray)
+    for (let i=0; i <= 26; i++)
+    {
+        const piece = piecesArray[i]
+        console.log(piece.position)
+        switch (side){
+            case "top":
+                if (piece.position.y === 1){
+                    layer.push(piecesArray[i])
+                }
+                break;
+            case "bot":
+                if (piece.position.y === -1){
+                    layer.push(piecesArray[i])
+                }
+                break;
+            case "left":
+                if (piece.position.x === -1){
+                    layer.push(piecesArray[i])
+                }
+                break;
+            case "right":
+                if (piece.position.x === 1){
+                    layer.push(piecesArray[i])
+                }
+                break;
+            case "front":
+                if (piece.position.z === 1){
+                    layer.push(piecesArray[i])
+                }
+                break;
+            case "back":
+                if (piece.position.z === -1){
+                    layer.push(piecesArray[i])
+                }
+                break;
+            default:
+                return
+        }
+    }
+    return layer
+}
+
+
+
+
+const createGroup = (layer) => {
+    const group = new THREE.Group()
+    scene.attach(group)
+    
+    for ( let i in layer ) {
+        group.attach( layer[ i ] );
+    }
+    return group
+}
+
+const updateScene = (tempGroup, layer) =>
+{ 
+    tempGroup.updateMatrixWorld()
+    for ( var i in layer ) {
+        scene.attach( layer[ i ] );
+    }
+    roundPositions()
+    
+    scene.remove(tempGroup)
+} 
+    
+/**
+ * Turn Functions
+ */
+
+const roundPositions = () => {
+    for (let i=0; i <= 26; i++){
+        let piece = piecesArray[i]
+        piece.position.x = Math.round(piece.position.x)
+        piece.position.y = Math.round(piece.position.y)
+        piece.position.z = Math.round(piece.position.z)
+    }
+}
+
+const spinY = (layer, direction) => 
+{
+    const tempGroup = createGroup(layer)
+    let timeline = gsap.timeline()
+    timeline
+        .to(tempGroup.rotation, { duration: 0.5, y: tempGroup.rotation.y + (Math.PI * 0.5 * direction)  })
+        .call(updateScene, [tempGroup, layer])
+}
+
+const spinX = (layer, direction) => 
+{
+    const tempGroup = createGroup(layer)
+    let timeline = gsap.timeline()
+    timeline
+        .to(tempGroup.rotation, { duration: 0.5, x: tempGroup.rotation.x + (Math.PI * 0.5 * direction)  })
+        .call(updateScene, [tempGroup, layer])
+}
+const spinZ = (layer, direction) => 
+{   
+    const tempGroup = createGroup(layer)
+    let timeline = gsap.timeline()
+    timeline
+        .to(tempGroup.rotation, { duration: 0.5, z: tempGroup.rotation.z + (Math.PI * 0.5 * direction)  })
+        .call(updateScene, [tempGroup, layer])
+}
+
+gui.add(parameters, 'spinTop')
+gui.add(parameters, 'spinTopInv')
+gui.add(parameters, 'spinBot')
+gui.add(parameters, 'spinBotInv')
+gui.add(parameters, 'spinRight')
+gui.add(parameters, 'spinRightInv')
+gui.add(parameters, 'spinLeft')
+gui.add(parameters, 'spinLeftInv')
+gui.add(parameters, 'spinFront')
+gui.add(parameters, 'spinFrontInv')
+gui.add(parameters, 'spinBack')
+gui.add(parameters, 'spinBackInv')
 
 
 /**
@@ -223,6 +375,59 @@ window.addEventListener('dblclick', () =>
     }
 })
 
+window.addEventListener("keydown", function (event) {
+    if (event.defaultPrevented) {
+      return; // Do nothing if the event was already processed
+    }
+  
+    switch (event.key) {
+        case "w":
+            parameters.spinBack();
+            break;
+        case "s":
+            parameters.spinBot();
+            break;
+        case "e":
+            parameters.spinLeftInv();
+            break;
+        case "d":
+            parameters.spinLeft();
+            break;
+        case "f":
+            parameters.spinTopInv();
+            break;
+        case "g":
+            parameters.spinFrontInv();
+            break;
+        case "h":
+            parameters.spinFront();
+            break;
+        case "j":
+            parameters.spinTop();
+            break;
+        case "i":
+            parameters.spinRight();
+            break;
+        case "k":
+            parameters.spinRightInv();
+            break;
+        case "o":
+            parameters.spinBackInv();
+            break;
+        case "l":
+            parameters.spinBotInv();
+            break;
+        default:
+        console.log(event.key)
+        return; // Quit when this doesn't handle the key event.
+    }
+  
+    // Cancel the default action to avoid it being handled twice
+    event.preventDefault();
+  }, true);
+  // the last option dispatches the event to the listener first,
+  // then dispatches event to window
+  
 
 /**
  * Camera
@@ -246,40 +451,15 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-
-/**
- * Turn Functions
- */
-// Top
-const rotateTop = (rubiksCube) =>
-{
-    const group = new THREE.Group()
-    // group.position.y = 0
-    // group.rotation.z = Math.PI * 0.5
-    scene.add( group )
-
-    rubiksCube.children.forEach((cube) => 
-    {
-        if(cube.position.y === 1)
-        {
-            group.add(cube)
-        }
-    })
-
-    group.rotation.set(0 , Math.PI / 2 , 0);
-}
-
 /**
  * Animate
  */
- // gsap.to(getTopGroup().position, {duration: 1, delay:1, rotation: 90})
 
 
 const tick = () =>
 {
     // Update controls
     controls.update()
-    rotateTop(rubiksCube)
 
     // Render
     renderer.render(scene, camera)
