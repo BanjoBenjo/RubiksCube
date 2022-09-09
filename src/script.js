@@ -4,73 +4,126 @@ import gsap from 'gsap'
 import * as lil from 'lil-gui'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
+// Global Variable to check wheter cube is already moving or not
+let moving = false
+
 /**
  * Debug
  */
- const gui = new lil.GUI()
+const gui = new lil.GUI()
 
- let parameters = {
+let spinFunctions = {
     spinTop: () => 
     {
         let group = assembleLayer('top')
-        spinY(group, -1)
+        spin('y', group, -1)
     },
     spinTopInv: () => 
     {
         let group = assembleLayer('top')
-        spinY(group, 1)
+        spin('y', group, 1)
     },
     spinBot: () => 
     {
         let group = assembleLayer('bot')
-        spinY(group, 1)
+        spin('y', group, 1)
     },
     spinBotInv: () => 
     {
         let group = assembleLayer('bot')
-        spinY(group, -1)
+        spin('y', group, -1)
     },
     spinLeft: () => 
     {
         let group = assembleLayer('left')
-        spinX(group, 1)
+        spin('x', group, 1)
     },
     spinLeftInv: () => 
     {
        let group = assembleLayer('left')
-       spinX(group, -1)
+       spin('x', group, -1)
     },
     spinRight: () => 
     {
         let group = assembleLayer('right')
-        spinX(group, 1)  
+        spin('x', group, 1)  
     },
     spinRightInv: () => 
     {
         let group = assembleLayer('right')
-        spinX(group, -1) 
+        spin('x', group, -1) 
     },
     spinFront: () => 
     {
        let group = assembleLayer('front')
-       spinZ(group, 1)
+       spin('z', group, 1)
     },
     spinFrontInv: () => 
     {
        let group = assembleLayer('front')
-       spinZ(group, -1)
+       spin('z', group, -1)
     },
     spinBack: () => 
     {
        let group = assembleLayer('back')
-       spinZ(group, 1)
+       spin('z', group, 1)
     },
     spinBackInv: () => 
     {
        let group = assembleLayer('back')
-       spinZ(group, -1)
+       spin('z', group, -1)
     },
- }
+    spinCubeX: () => 
+    {
+       let group = assembleLayer('cube')
+       spin('x', group, 1)
+    },
+    spinCubeXInv: () => 
+    {
+       let group = assembleLayer('cube')
+       spin('x', group, -1)
+    },
+    spinCubeY: () => 
+    {
+       let group = assembleLayer('cube')
+       spin('y', group, 1)
+    },
+    spinCubeYInv: () => 
+    {
+       let group = assembleLayer('cube')
+       spin('y', group, 1)
+    },
+    spinCubeZ: () => 
+    {
+       let group = assembleLayer('cube')
+       spin('z', group, 1)
+    },
+    spinCubeZInv: () => 
+    {
+       let group = assembleLayer('cube')
+       spin('z', group, 1)
+    },
+}
+
+const parameters = {
+    animationDuration: 0.3
+}
+
+gui.add(parameters, 'animationDuration').min(0).max(0.5)
+
+const spinFunctionsGui = gui.addFolder( 'Spin Functions' )
+spinFunctionsGui.add(spinFunctions, 'spinTop').name('Top')
+spinFunctionsGui.add(spinFunctions, 'spinTopInv').name('Top Inverted')
+spinFunctionsGui.add(spinFunctions, 'spinBot').name('Bot')
+spinFunctionsGui.add(spinFunctions, 'spinBotInv').name('Bot Inverted')
+spinFunctionsGui.add(spinFunctions, 'spinRight').name('Right')
+spinFunctionsGui.add(spinFunctions, 'spinRightInv').name('Right Inverted')
+spinFunctionsGui.add(spinFunctions, 'spinLeft').name("Left")
+spinFunctionsGui.add(spinFunctions, 'spinLeftInv').name('Left Ivverted')
+spinFunctionsGui.add(spinFunctions, 'spinFront').name('Front')
+spinFunctionsGui.add(spinFunctions, 'spinFrontInv').name('Front Intverted')
+spinFunctionsGui.add(spinFunctions, 'spinBack').name('Back')
+spinFunctionsGui.add(spinFunctions, 'spinBackInv').name('Back Ivverted')
 
 /**
  * Base
@@ -194,8 +247,8 @@ for (let i=0; i <= 26; i++)
 
 
 // Helper
-const helper = new THREE.AxesHelper(2)
-scene.add(helper)
+// const helper = new THREE.AxesHelper(2)
+// scene.add(helper)
 
 
 /**
@@ -203,12 +256,12 @@ scene.add(helper)
  */
  const assembleLayer = (side) => {
     let layer = []
-    console.log(piecesArray)
     for (let i=0; i <= 26; i++)
     {
         const piece = piecesArray[i]
-        console.log(piece.position)
         switch (side){
+            case "cube":
+                layer.push(piecesArray[i])
             case "top":
                 if (piece.position.y === 1){
                     layer.push(piecesArray[i])
@@ -283,44 +336,25 @@ const roundPositions = () => {
     }
 }
 
-const spinY = (layer, direction) => 
+
+const spin = (axis, layer, direction) => 
 {
+    if (moving === true)
+        return
+
     const tempGroup = createGroup(layer)
     let timeline = gsap.timeline()
+
+    const rotationAnimation = {duration : parameters.animationDuration}
+    rotationAnimation[axis] = tempGroup.rotation[axis] + (Math.PI * 0.5 * direction) 
+
     timeline
-        .to(tempGroup.rotation, { duration: 0.5, y: tempGroup.rotation.y + (Math.PI * 0.5 * direction)  })
+        .call(()=>{ moving = true })
+        .to(tempGroup.rotation, rotationAnimation)
         .call(updateScene, [tempGroup, layer])
+        .call(()=>{ moving = false })
 }
 
-const spinX = (layer, direction) => 
-{
-    const tempGroup = createGroup(layer)
-    let timeline = gsap.timeline()
-    timeline
-        .to(tempGroup.rotation, { duration: 0.5, x: tempGroup.rotation.x + (Math.PI * 0.5 * direction)  })
-        .call(updateScene, [tempGroup, layer])
-}
-const spinZ = (layer, direction) => 
-{   
-    const tempGroup = createGroup(layer)
-    let timeline = gsap.timeline()
-    timeline
-        .to(tempGroup.rotation, { duration: 0.5, z: tempGroup.rotation.z + (Math.PI * 0.5 * direction)  })
-        .call(updateScene, [tempGroup, layer])
-}
-
-gui.add(parameters, 'spinTop')
-gui.add(parameters, 'spinTopInv')
-gui.add(parameters, 'spinBot')
-gui.add(parameters, 'spinBotInv')
-gui.add(parameters, 'spinRight')
-gui.add(parameters, 'spinRightInv')
-gui.add(parameters, 'spinLeft')
-gui.add(parameters, 'spinLeftInv')
-gui.add(parameters, 'spinFront')
-gui.add(parameters, 'spinFrontInv')
-gui.add(parameters, 'spinBack')
-gui.add(parameters, 'spinBackInv')
 
 
 /**
@@ -381,44 +415,63 @@ window.addEventListener("keydown", function (event) {
     }
   
     switch (event.key) {
+        case "q":
+            spinFunctions.spinCubeZInv();
+            break;
+        case "a":
+            spinFunctions.spinCubeYInv();
+            break;
         case "w":
-            parameters.spinBack();
+            spinFunctions.spinBack();
             break;
         case "s":
-            parameters.spinBot();
+            spinFunctions.spinBot();
             break;
         case "e":
-            parameters.spinLeftInv();
+            spinFunctions.spinLeftInv();
             break;
         case "d":
-            parameters.spinLeft();
+            spinFunctions.spinLeft();
             break;
         case "f":
-            parameters.spinTopInv();
+            spinFunctions.spinTopInv();
+            break;
+        case "t":
+        case "y":
+            spinFunctions.spinCubeX();
             break;
         case "g":
-            parameters.spinFrontInv();
+            spinFunctions.spinFrontInv();
+            break;
+        case "b":
+        case "n":
+            spinFunctions.spinCubeXInv();
             break;
         case "h":
-            parameters.spinFront();
+            spinFunctions.spinFront();
             break;
         case "j":
-            parameters.spinTop();
+            spinFunctions.spinTop();
             break;
         case "i":
-            parameters.spinRight();
+            spinFunctions.spinRight();
             break;
         case "k":
-            parameters.spinRightInv();
+            spinFunctions.spinRightInv();
             break;
         case "o":
-            parameters.spinBackInv();
+            spinFunctions.spinBackInv();
             break;
-        case "l":
-            parameters.spinBotInv();
+        case "l":spinFunctions
+            spinFunctions.spinBotInv();
+            break;
+        case "p":
+            spinFunctions.spinCubeZ();
+            break;
+        case "ö":spinFunctions
+            spinFunctions.spinCubeY();
             break;
         default:
-        console.log(event.key)
         return; // Quit when this doesn't handle the key event.
     }
   
