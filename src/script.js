@@ -73,6 +73,16 @@ let spinFunctions = {
        let group = assembleLayer('back')
        spin('z', group, -1)
     },
+    spinMid: () => 
+    {
+       let group = assembleLayer('mid')
+       spin('x', group, 1)
+    },
+    spinMidInv: () => 
+    {
+       let group = assembleLayer('mid')
+       spin('x', group, -1)
+    },
     spinCubeX: () => 
     {
        let group = assembleLayer('cube')
@@ -91,7 +101,7 @@ let spinFunctions = {
     spinCubeYInv: () => 
     {
        let group = assembleLayer('cube')
-       spin('y', group, 1)
+       spin('y', group, -1)
     },
     spinCubeZ: () => 
     {
@@ -101,7 +111,7 @@ let spinFunctions = {
     spinCubeZInv: () => 
     {
        let group = assembleLayer('cube')
-       spin('z', group, 1)
+       spin('z', group, -1)
     },
 }
 
@@ -292,6 +302,11 @@ for (let i=0; i <= 26; i++)
                     layer.push(piecesArray[i])
                 }
                 break;
+            case "mid":
+                if (piece.position.x === 0){
+                    layer.push(piecesArray[i])
+                }
+                break;
             default:
                 return
         }
@@ -416,10 +431,10 @@ window.addEventListener("keydown", function (event) {
   
     switch (event.key) {
         case "q":
-            spinFunctions.spinCubeZInv();
+            spinFunctions.spinCubeZ();
             break;
         case "a":
-            spinFunctions.spinCubeYInv();
+            spinFunctions.spinCubeY();
             break;
         case "w":
             spinFunctions.spinBack();
@@ -437,27 +452,27 @@ window.addEventListener("keydown", function (event) {
             spinFunctions.spinTopInv();
             break;
         case "t":
-        case "y":
-            spinFunctions.spinCubeX();
+        case "z":
+            spinFunctions.spinCubeXInv();
             break;
         case "g":
-            spinFunctions.spinFrontInv();
+            spinFunctions.spinFront();
             break;
         case "b":
         case "n":
-            spinFunctions.spinCubeXInv();
+            spinFunctions.spinCubeX();
             break;
         case "h":
-            spinFunctions.spinFront();
+            spinFunctions.spinFrontInv();
             break;
         case "j":
             spinFunctions.spinTop();
             break;
         case "i":
-            spinFunctions.spinRight();
+            spinFunctions.spinRightInv();
             break;
         case "k":
-            spinFunctions.spinRightInv();
+            spinFunctions.spinRight();
             break;
         case "o":
             spinFunctions.spinBackInv();
@@ -466,11 +481,20 @@ window.addEventListener("keydown", function (event) {
             spinFunctions.spinBotInv();
             break;
         case "p":
-            spinFunctions.spinCubeZ();
+            spinFunctions.spinCubeZInv();
             break;
         case "ö":spinFunctions
-            spinFunctions.spinCubeY();
+            spinFunctions.spinCubeYInv();
             break;
+        case "5":spinFunctions
+        case "6":spinFunctions
+            spinFunctions.spinMid();
+            break;
+        case "x":spinFunctions
+        case ".":spinFunctions
+            spinFunctions.spinMidInv();
+            break;
+
         default:
         return; // Quit when this doesn't handle the key event.
     }
