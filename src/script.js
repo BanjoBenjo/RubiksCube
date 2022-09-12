@@ -1,11 +1,22 @@
 import './style.css'
 import * as THREE from 'three'
-import gsap from 'gsap'
 import * as lil from 'lil-gui'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import Cube from './cube.js'
+import algorithms from './algorithms.json'
 
-// Global Variable to check wheter cube is already moving or not
-let moving = false
+
+/**
+ * Base
+ */
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
+
+// Scene
+const scene = new THREE.Scene()
+
+const cube = new Cube(scene)
+cube.addToScene()
 
 /**
  * Debug
@@ -13,110 +24,30 @@ let moving = false
 const gui = new lil.GUI()
 
 let spinFunctions = {
-    spinTop: () => 
-    {
-        let group = assembleLayer('top')
-        spin('y', group, -1)
-    },
-    spinTopInv: () => 
-    {
-        let group = assembleLayer('top')
-        spin('y', group, 1)
-    },
-    spinBot: () => 
-    {
-        let group = assembleLayer('bot')
-        spin('y', group, 1)
-    },
-    spinBotInv: () => 
-    {
-        let group = assembleLayer('bot')
-        spin('y', group, -1)
-    },
-    spinLeft: () => 
-    {
-        let group = assembleLayer('left')
-        spin('x', group, 1)
-    },
-    spinLeftInv: () => 
-    {
-       let group = assembleLayer('left')
-       spin('x', group, -1)
-    },
-    spinRight: () => 
-    {
-        let group = assembleLayer('right')
-        spin('x', group, 1)  
-    },
-    spinRightInv: () => 
-    {
-        let group = assembleLayer('right')
-        spin('x', group, -1) 
-    },
-    spinFront: () => 
-    {
-       let group = assembleLayer('front')
-       spin('z', group, 1)
-    },
-    spinFrontInv: () => 
-    {
-       let group = assembleLayer('front')
-       spin('z', group, -1)
-    },
-    spinBack: () => 
-    {
-       let group = assembleLayer('back')
-       spin('z', group, 1)
-    },
-    spinBackInv: () => 
-    {
-       let group = assembleLayer('back')
-       spin('z', group, -1)
-    },
-    spinMid: () => 
-    {
-       let group = assembleLayer('mid')
-       spin('x', group, 1)
-    },
-    spinMidInv: () => 
-    {
-       let group = assembleLayer('mid')
-       spin('x', group, -1)
-    },
-    spinCubeX: () => 
-    {
-       let group = assembleLayer('cube')
-       spin('x', group, 1)
-    },
-    spinCubeXInv: () => 
-    {
-       let group = assembleLayer('cube')
-       spin('x', group, -1)
-    },
-    spinCubeY: () => 
-    {
-       let group = assembleLayer('cube')
-       spin('y', group, 1)
-    },
-    spinCubeYInv: () => 
-    {
-       let group = assembleLayer('cube')
-       spin('y', group, -1)
-    },
-    spinCubeZ: () => 
-    {
-       let group = assembleLayer('cube')
-       spin('z', group, 1)
-    },
-    spinCubeZInv: () => 
-    {
-       let group = assembleLayer('cube')
-       spin('z', group, -1)
-    },
+    spinTop: () => { cube.spinTop() },
+    spinTopInv: () => { cube.spinTopInv() }, 
+    spinBot: () => { cube.spinBot() }, 
+    spinBotInv: () => { cube.spinBotInv() },
+    spinLeft: () => { cube.spinLeft() }, 
+    spinLeftInv: () => { cube.spinLeftInv() }, 
+    spinRight: () => { cube.spinRight() }, 
+    spinRightInv: () => { cube.spinRightInv() }, 
+    spinFront: () => { cube.spinFront() }, 
+    spinFrontInv: () => { cube.spinFrontInv() }, 
+    spinBack: () => { cube.spinBack() }, 
+    spinBackInv: () => { cube.spinBackInv() }, 
+    spinMid: () => { cube.spinMid() }, 
+    spinMidInv: () => { cube.spinMidInv() }, 
+    spinCubeX: () => { cube.spinCubeX() }, 
+    spinCubeXInv: () => { cube.spinCubeXInv() }, 
+    spinCubeY: () => { cube.spinCubeY() }, 
+    spinCubeYInv: () => { cube.spinCubeYInv() }, 
+    spinCubeZ: () => { cube.spinCubeZ() }, 
+    spinCubeZInv: () => { cube.spinCubeZInv() }
 }
 
 const parameters = {
-    animationDuration: 0.3
+    animationDuration: cube.animationDuration
 }
 
 gui.add(parameters, 'animationDuration').min(0).max(0.5)
@@ -135,241 +66,51 @@ spinFunctionsGui.add(spinFunctions, 'spinFrontInv').name('Front Intverted')
 spinFunctionsGui.add(spinFunctions, 'spinBack').name('Back')
 spinFunctionsGui.add(spinFunctions, 'spinBackInv').name('Back Ivverted')
 
-/**
- * Base
- */
-// Canvas
-const canvas = document.querySelector('canvas.webgl')
+spinFunctionsGui.close()
 
-// Scene
-const scene = new THREE.Scene()
-
-/**
- * Objects
- */
-// create all 26 cubes
-const createPieces = () => 
-{
-    let piecesArray = [] // cubes with plates attached in group
-    const rubiksMaterial = new THREE.MeshBasicMaterial({ color: 0xd9d9d9 })
-
-    for (let x=0; x <= 26; x++)
-    {
-        let group = new THREE.Group()
-
-        const cube = new THREE.Mesh(
-            new THREE.BoxGeometry(0.9, 0.9, 0.9),
-            rubiksMaterial
-        )
-        
-        const xIndex = (x % 3) -1
-        const yIndex = Math.floor(x / 9) -1
-        const zIndex = Math.floor(x / 3) % 3 -1
-
-        group.add(cube)
-        group = addPlates(group, xIndex, yIndex, zIndex)    
-        
-        group.name = x
-        group.position.x = xIndex
-        group.position.y = yIndex
-        group.position.z = zIndex
-
-        piecesArray[x] = group
-    }
-    return piecesArray
+let algorithmFunctions = {
+    "LINE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EOLL.LINE) },
+    "SMALL-L": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EOLL["SMALL-L"]) },
+    "DOT": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EOLL.DOT) },
+    "SUNE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.SUNE) },
+    "ANTI-SUNE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL["ANTI-SUNE"]) },
+    "H": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.H) },
+    "P'": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL["P'"]) },
+    "HEADLIGHTS": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.HEADLIGHTS) },
+    "T": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.T) },
+    "BOWTIE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.BOWTIE) },
+    "HEADLIGHTS-BACK": () => { cube.algorithmInterpreter(algorithms["2LOLL"].CPLL["HEADLIGHTS-BACK"]) },
+    "NO-HEADLIGHTS": () => { cube.algorithmInterpreter(algorithms["2LOLL"].CPLL["NO-HEADLIGHTS"]) },
+    "UA-PERM": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EPLL["UA-PERM"]) },
+    "UB-PERM": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EPLL["UB-PERM"]) },
+    "Z-PERM": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EPLL["Z-PERM"]) },
+    "H-PERM": () => { cube.algorithmInterpreter(algorithms["2LOLL"].EPLL["H-PERM"]) },
 }
 
-const addPlates = (group, xIndex, yIndex, zIndex) => {    
-    if (yIndex === 1){   
-        group.add( 
-            createPlate({
-                geometry: new THREE.BoxGeometry(0.8, 0.1, 0.8),
-                color: 0xf6d32d,   
-                side: 'top' })
-                )
-        }
-    if (yIndex === -1){   
-        group.add( 
-            createPlate({
-                geometry: new THREE.BoxGeometry(0.8, 0.1, 0.8),
-                color: 0xEDEDED,   
-                side: 'bot' })
-                )
-        }
-    if (xIndex === 1){   
-        group.add( 
-            createPlate({
-                geometry: new THREE.BoxGeometry(0.1, 0.8, 0.8),
-                color: 0x3584e4,   
-                side: 'right' })
-                )
-        }
-    if (xIndex === -1){   
-        group.add( 
-            createPlate({
-                geometry: new THREE.BoxGeometry(0.1, 0.8, 0.8),
-                color: 0x26a269,   
-                side: 'left' })
-                )
-        }
-    if (zIndex === -1){   
-        group.add( 
-            createPlate({
-                geometry: new THREE.BoxGeometry(0.8, 0.8, 0.1),
-                color: 0xff7800,   
-                side: 'front' })
-                )
-        }
-    if (zIndex === 1){   
-        group.add( 
-            createPlate({
-                geometry: new THREE.BoxGeometry(0.8, 0.8, 0.1),
-                color: 0xe01b24,   
-                side: 'back' })
-                )
-        }
+const algoGui = gui.addFolder( 'Algorithms' )
+const eollGui = algoGui.addFolder("EOLL")
+eollGui.add(algorithmFunctions, 'LINE')
+eollGui.add(algorithmFunctions, "SMALL-L")
+eollGui.add(algorithmFunctions, "DOT")
 
-    return group 
-}
+const ocllGui = algoGui.addFolder("OCLL")
+ocllGui.add(algorithmFunctions, 'SUNE')
+ocllGui.add(algorithmFunctions, 'ANTI-SUNE')
+ocllGui.add(algorithmFunctions, 'H')
+ocllGui.add(algorithmFunctions, "P'")
+ocllGui.add(algorithmFunctions, 'HEADLIGHTS')
+ocllGui.add(algorithmFunctions, 'T')
+ocllGui.add(algorithmFunctions, 'BOWTIE')
 
-const createPlate = ({ geometry, color, side}) => {
-    const plane = new THREE.Mesh
-    (
-        geometry,
-        new THREE.MeshBasicMaterial({ color: color })
-    )
+const cpllGui = algoGui.addFolder("cpll")
+cpllGui.add(algorithmFunctions, 'HEADLIGHTS-BACK')
+cpllGui.add(algorithmFunctions, 'NO-HEADLIGHTS')
 
-    if (side === 'top')     { plane.position.y = 0.5}
-    if (side === 'bot')     { plane.position.y = -0.5}
-    if (side === 'left')    { plane.position.x = -0.5}
-    if (side === 'right')   { plane.position.x = 0.5}
-    if (side === 'back')    { plane.position.z = 0.5}
-    if (side === 'front')   { plane.position.z = -0.5 }
-    return plane
-}
-
-// Debug
-let piecesArray = createPieces()
-for (let i=0; i <= 26; i++)
-{
-    scene.add(piecesArray[i])
-}
-
-
-// Helper
-// const helper = new THREE.AxesHelper(2)
-// scene.add(helper)
-
-
-/**
- * Update Moveable Groups
- */
- const assembleLayer = (side) => {
-    let layer = []
-    for (let i=0; i <= 26; i++)
-    {
-        const piece = piecesArray[i]
-        switch (side){
-            case "cube":
-                layer.push(piecesArray[i])
-            case "top":
-                if (piece.position.y === 1){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            case "bot":
-                if (piece.position.y === -1){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            case "left":
-                if (piece.position.x === -1){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            case "right":
-                if (piece.position.x === 1){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            case "front":
-                if (piece.position.z === 1){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            case "back":
-                if (piece.position.z === -1){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            case "mid":
-                if (piece.position.x === 0){
-                    layer.push(piecesArray[i])
-                }
-                break;
-            default:
-                return
-        }
-    }
-    return layer
-}
-
-
-
-
-const createGroup = (layer) => {
-    const group = new THREE.Group()
-    scene.attach(group)
-    
-    for ( let i in layer ) {
-        group.attach( layer[ i ] );
-    }
-    return group
-}
-
-const updateScene = (tempGroup, layer) =>
-{ 
-    tempGroup.updateMatrixWorld()
-    for ( var i in layer ) {
-        scene.attach( layer[ i ] );
-    }
-    roundPositions()
-    
-    scene.remove(tempGroup)
-} 
-    
-/**
- * Turn Functions
- */
-
-const roundPositions = () => {
-    for (let i=0; i <= 26; i++){
-        let piece = piecesArray[i]
-        piece.position.x = Math.round(piece.position.x)
-        piece.position.y = Math.round(piece.position.y)
-        piece.position.z = Math.round(piece.position.z)
-    }
-}
-
-
-const spin = (axis, layer, direction) => 
-{
-    if (moving === true)
-        return
-
-    const tempGroup = createGroup(layer)
-    let timeline = gsap.timeline()
-
-    const rotationAnimation = {duration : parameters.animationDuration}
-    rotationAnimation[axis] = tempGroup.rotation[axis] + (Math.PI * 0.5 * direction) 
-
-    timeline
-        .call(()=>{ moving = true })
-        .to(tempGroup.rotation, rotationAnimation)
-        .call(updateScene, [tempGroup, layer])
-        .call(()=>{ moving = false })
-}
-
+const epllGui = algoGui.addFolder("cpll")
+epllGui.add(algorithmFunctions, 'UA-PERM')
+epllGui.add(algorithmFunctions, 'UB-PERM')
+epllGui.add(algorithmFunctions, 'Z-PERM')
+epllGui.add(algorithmFunctions, 'H-PERM')
 
 
 /**
@@ -431,68 +172,68 @@ window.addEventListener("keydown", function (event) {
   
     switch (event.key) {
         case "q":
-            spinFunctions.spinCubeZ();
+            cube.spinCubeZ();
             break;
         case "a":
-            spinFunctions.spinCubeY();
+            cube.spinCubeY();
             break;
         case "w":
-            spinFunctions.spinBack();
+            cube.spinBack();
             break;
         case "s":
-            spinFunctions.spinBot();
+            cube.spinBot();
             break;
         case "e":
-            spinFunctions.spinLeftInv();
+            cube.spinLeftInv();
             break;
         case "d":
-            spinFunctions.spinLeft();
+            cube.spinLeft();
             break;
         case "f":
-            spinFunctions.spinTopInv();
+            cube.spinTopInv();
             break;
         case "t":
         case "z":
-            spinFunctions.spinCubeXInv();
+            cube.spinCubeXInv();
             break;
         case "g":
-            spinFunctions.spinFront();
+            cube.spinFront();
             break;
         case "b":
         case "n":
-            spinFunctions.spinCubeX();
+            cube.spinCubeX();
             break;
         case "h":
-            spinFunctions.spinFrontInv();
+            cube.spinFrontInv();
             break;
         case "j":
-            spinFunctions.spinTop();
+            cube.spinTop();
             break;
         case "i":
-            spinFunctions.spinRightInv();
+            cube.spinRightInv();
             break;
         case "k":
-            spinFunctions.spinRight();
+            cube.spinRight();
             break;
         case "o":
-            spinFunctions.spinBackInv();
+            cube.spinBackInv();
             break;
-        case "l":spinFunctions
-            spinFunctions.spinBotInv();
+        case "l":
+            cube.spinBotInv();
             break;
         case "p":
-            spinFunctions.spinCubeZInv();
+            cube.spinCubeZInv();
             break;
-        case "ö":spinFunctions
-            spinFunctions.spinCubeYInv();
+        case "ö":
+            cube.spinCubeYInv();
             break;
-        case "5":spinFunctions
-        case "6":spinFunctions
-            spinFunctions.spinMid();
+        case "5":
+        case "6":
+            cube.spinMid();
             break;
-        case "x":spinFunctions
-        case ".":spinFunctions
-            spinFunctions.spinMidInv();
+        case "x":
+        case ".":
+            cube.spinMidInv();
             break;
 
         default:
