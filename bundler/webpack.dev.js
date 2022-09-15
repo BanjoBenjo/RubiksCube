@@ -12,6 +12,7 @@ module.exports = merge(
     commonConfiguration,
     {
         stats: 'errors-warnings',
+        stats: { children: true, },
         mode: 'development',
         infrastructureLogging:
         {

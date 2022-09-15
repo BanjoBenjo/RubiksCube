@@ -18,6 +18,12 @@ const scene = new THREE.Scene()
 const cube = new Cube(scene)
 cube.addToScene()
 
+// Light
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+scene.add(ambientLight)
+
+
 /**
  * Debug
  */
@@ -75,7 +81,7 @@ let algorithmFunctions = {
     "SUNE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.SUNE) },
     "ANTI-SUNE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL["ANTI-SUNE"]) },
     "H": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.H) },
-    "P'": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL["P'"]) },
+    "PI": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL["P'"]) },
     "HEADLIGHTS": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.HEADLIGHTS) },
     "T": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.T) },
     "BOWTIE": () => { cube.algorithmInterpreter(algorithms["2LOLL"].OCLL.BOWTIE) },
@@ -97,7 +103,7 @@ const ocllGui = algoGui.addFolder("OCLL")
 ocllGui.add(algorithmFunctions, 'SUNE')
 ocllGui.add(algorithmFunctions, 'ANTI-SUNE')
 ocllGui.add(algorithmFunctions, 'H')
-ocllGui.add(algorithmFunctions, "P'")
+ocllGui.add(algorithmFunctions, "PI")
 ocllGui.add(algorithmFunctions, 'HEADLIGHTS')
 ocllGui.add(algorithmFunctions, 'T')
 ocllGui.add(algorithmFunctions, 'BOWTIE')
@@ -112,6 +118,14 @@ epllGui.add(algorithmFunctions, 'UB-PERM')
 epllGui.add(algorithmFunctions, 'Z-PERM')
 epllGui.add(algorithmFunctions, 'H-PERM')
 
+for (var key in algorithmFunctions) {
+    // skip loop if the property is from prototype
+    if (!algorithmFunctions.hasOwnProperty(key)) continue;
+
+    const algoFunction = algorithmFunctions[key];
+    const element = document.getElementById(key)
+    element.onclick = () => { algoFunction(); }
+}
 
 /**
  * Sizes

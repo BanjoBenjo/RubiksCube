@@ -32,14 +32,15 @@ export default class Cube {
 
     createPieces() {
         let piecesArray = [] // cubes with plates attached in group
-        const rubiksMaterial = new THREE.MeshBasicMaterial({ color: 0xd9d9d9 })
+        const rubiksMaterial = new THREE.MeshStandardMaterial({ color: 0xd9d9d9 })
+        const rubiksGeometry = new THREE.BoxGeometry(0.9, 0.9, 0.9)
 
         for (let x=0; x <= 26; x++)
         {
             let group = new THREE.Group()
 
             const cube = new THREE.Mesh(
-                new THREE.BoxGeometry(0.9, 0.9, 0.9),
+                rubiksGeometry,
                 rubiksMaterial
             )
             
@@ -117,7 +118,7 @@ export default class Cube {
         const plane = new THREE.Mesh
         (
             geometry,
-            new THREE.MeshBasicMaterial({ color: color })
+            new THREE.MeshStandardMaterial({ color: color })
         )
     
         if (side === 'top')     { plane.position.y = 0.5}
