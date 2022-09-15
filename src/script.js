@@ -28,6 +28,7 @@ scene.add(ambientLight)
  * Debug
  */
 const gui = new lil.GUI()
+gui.close()
 
 let spinFunctions = {
     spinTop: () => { cube.spinTop() },
