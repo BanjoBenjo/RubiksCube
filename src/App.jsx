@@ -5,11 +5,13 @@ import Cube from './components/Cube/Cube'
 import AlgorithmSidebar from './components/AlgorithmSidebar'
 import { useRubiksCubeController } from './components/Cube/useRubiksCubeController'
 import { useAlgorithmInterpreter } from './components/Cube/useAlgorithmInterpreter'
+import { useCubeKeyboardControls } from './components/Cube/useCubeKeyboardControls'
 
 export default function App() {
   const pieceRefs = useRef([])
   const { rotateLayer } = useRubiksCubeController(pieceRefs)
   const interpreter = useAlgorithmInterpreter(rotateLayer)
+  useCubeKeyboardControls(rotateLayer)
 
   return (
     <div className="flex h-screen w-screen">
