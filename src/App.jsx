@@ -1,16 +1,28 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment, OrbitControls } from '@react-three/drei'
-import RubiksCube from './components/RubiksCube'
+import Cube from './components/Cube/Cube'
+import AlgorithmSidebar from './components/AlgorithmSidebar'
+import { useRubiksCubeController } from './components/Cube/useRubiksCubeController'
+import { useAlgorithmInterpreter } from './components/Cube/useAlgorithmInterpreter'
 
 export default function App() {
+  const pieceRefs = useRef([])
+  const { rotateLayer } = useRubiksCubeController(pieceRefs)
+  const interpreter = useAlgorithmInterpreter(rotateLayer)
+
   return (
-    <Canvas className="w-[calc(100vw-400px)] h-screen" camera={{ position: [5, 5, 5], fov: 50 }}>
-      {/* <ambientLight intensity={0.6} /> */}
-      {/* <directionalLight position={[10, 10, 10]} intensity={1} /> */}
-      <Environment preset="apartment" />
-      <OrbitControls />
-      <RubiksCube />
-    </Canvas>
+    <div className="flex h-screen w-screen">
+      <AlgorithmSidebar
+        onAlgorithmClick={(algo) => interpreter(algo.algorithm)}
+      />
+      <div className="flex-1">
+        <Canvas className="w-full h-full" camera={{ position: [5, 5, 5], fov: 50 }}>
+          <Environment preset="apartment" />
+          <OrbitControls />
+          <Cube pieceRefs={pieceRefs} />
+        </Canvas>
+      </div>
+    </div>
   )
 }

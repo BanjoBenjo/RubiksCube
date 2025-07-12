@@ -23,7 +23,6 @@ import hPermImg from '../assets/images/h_perm.png'
 
 import algorithms from '../algorithms.json'
 
-// 🖼️ Bild-Zuordnung basierend auf ID
 const algorithmImages = {
   "LINE": lineImg,
   "SMALL-L": smallLImg,
@@ -45,42 +44,39 @@ const algorithmImages = {
 
 export default function AlgorithmSidebar({ onAlgorithmClick }) {
   return (
-    <div className="sidenav">
-      {Object.entries(algorithms).map(([groupTitle, groupAlgos]) => (
-        <div key={groupTitle}>
-          <div className="seperator">
-            <h2>{groupTitle}</h2>
+    <aside className="w-72 h-full bg-zinc-900 text-white shadow-lg border-r border-zinc-800 overflow-y-auto">
+      <div className="p-4 space-y-6">
+        {Object.entries(algorithms).map(([groupTitle, groupAlgos]) => (
+          <div key={groupTitle}>
+            <h2 className="mb-2 text-sm uppercase tracking-wider text-zinc-400 font-semibold">
+              {groupTitle}
+            </h2>
+            <div className="space-y-2">
+              {Object.entries(groupAlgos).map(([id, algorithmString]) => {
+                const image = algorithmImages[id] || ''
+                return (
+                  <button
+                    key={id}
+                    onClick={() => onAlgorithmClick?.({ id, name: id, algorithm: algorithmString })}
+                    className="flex items-center w-full gap-3 p-2 rounded-md bg-zinc-800/50 hover:bg-zinc-700/70 transition"
+                  >
+                    <div className="flex-1 text-left">
+                      <div className="text-sm font-medium">{id}</div>
+                      <div className="text-xs text-zinc-400">{algorithmString}</div>
+                    </div>
+                    <img
+                      src={image}
+                      alt={id}
+                      loading="lazy"
+                      className="w-14 h-14 object-contain rounded border border-zinc-700"
+                    />
+                  </button>
+                )
+              })}
+            </div>
           </div>
-          {Object.entries(groupAlgos).map(([id, algorithmString]) => {
-            const image = algorithmImages[id] || '' // fallback falls kein Bild vorhanden
-
-            return (
-              <div
-                key={id}
-                className="flex items-center gap-4 p-2 border-b border-gray-700 hover:bg-gray-800 cursor-pointer"
-                onClick={() =>
-                  onAlgorithmClick?.({ id, name: id, algorithm: algorithmString })
-                }
-              >
-                <div className="flex-1">
-                  <h4 className="text-white">{id}</h4>
-                  <h3 className="text-xs text-gray-400">{algorithmString}</h3>
-                </div>
-                <div className="shrink-0">
-                  <img
-                    src={image}
-                    alt={id}
-                    loading="lazy"
-                    width="64"
-                    height="64"
-                    className="object-contain aspect-square w-16 h-16 rounded"
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </aside>
   )
 }

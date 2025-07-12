@@ -1,13 +1,13 @@
-import React from 'react'
-import { Box, RoundedBox } from '@react-three/drei'
+import React, { forwardRef } from 'react'
+import { RoundedBox } from '@react-three/drei'
+import { Group } from 'three'
 
 /**
  * Props:
  * - position: [x, y, z]
  * - index: number (for .name or .key)
  */
-export default function CubePiece({ position = [0, 0, 0], index }) {
-  const ref = React.useRef()
+const CubePiece = forwardRef(({ position = [0, 0, 0], index }, ref) => {
 
   const plateConfigs = [
     { side: 'top', condition: position[1] === 1, color: 0xf6d32d, size: [0.8, 0.02, 0.8], pos: [0, 0.475, 0] },
@@ -42,4 +42,7 @@ export default function CubePiece({ position = [0, 0, 0], index }) {
       )}
     </group>
   )
-}
+})
+
+export default CubePiece
+

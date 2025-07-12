@@ -1,11 +1,7 @@
-import React, { useRef, useMemo } from 'react'
-import CubePiece from './CubePiece'
+import React, { useMemo } from 'react'
+import CubePiece from '../CubePiece'
 
-export default function RubiksCube() {
-  // Ref-Array für spätere Animation (z. B. durch rotation, attach etc.)
-  const pieceRefs = useRef([])
-
-  // Positionen vorbereiten: alle Kombinationen von x, y, z ∈ [-1, 0, 1]
+export default function Cube({ pieceRefs }) {
   const cubePositions = useMemo(() => {
     const positions = []
     let i = 0
@@ -20,7 +16,7 @@ export default function RubiksCube() {
   }, [])
 
   return (
-    <group name="RubiksCube">
+    <group name="Cube">
       {cubePositions.map(({ index, position }) => (
         <CubePiece
           key={index}
