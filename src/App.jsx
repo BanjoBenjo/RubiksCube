@@ -6,6 +6,7 @@ import AlgorithmSidebar from './components/AlgorithmSidebar'
 import { useRubiksCubeController } from './components/Cube/useRubiksCubeController'
 import { useAlgorithmInterpreter } from './components/Cube/useAlgorithmInterpreter'
 import { useCubeKeyboardControls } from './components/Cube/useCubeKeyboardControls'
+import Keyboard from './components/Keyboard/Keyboard'
 
 export default function App() {
   const pieceRefs = useRef([])
@@ -22,7 +23,12 @@ export default function App() {
         <Canvas className="w-full h-full" camera={{ position: [5, 5, 5], fov: 50 }}>
           <Environment preset="apartment" />
           <OrbitControls />
-          <Cube pieceRefs={pieceRefs} />
+          <group scale={1.5}>
+            <Cube pieceRefs={pieceRefs} />
+          </group>
+          <group position={[0, -6, 5]} rotation={[-1 / 4 * Math.PI, 0, 0]}>
+            <Keyboard />
+          </group>
         </Canvas>
       </div>
     </div>

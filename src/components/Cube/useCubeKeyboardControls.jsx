@@ -5,39 +5,53 @@ export function useCubeKeyboardControls(rotateLayer) {
     if (!rotateLayer) return
 
     const keyMap = {
-      q: () => rotateLayer('z', 'cube', -1),
-      p: () => rotateLayer('z', 'cube', 1),
-      a: () => rotateLayer('y', 'cube', -1),
-      ö: () => rotateLayer('y', 'cube', 1),
-      z: () => rotateLayer('x', 'cube', 1),
-      b: () => rotateLayer('x', 'cube', -1),
-      n: () => rotateLayer('x', 'cube', -1),
+      // Front face (z axis)
+      f: () => rotateLayer('z', 'front', 1),
+      F: () => rotateLayer('z', 'front', -1),
 
-      w: () => rotateLayer('z', 'back', -1),
-      o: () => rotateLayer('z', 'back', 1),
-      e: () => rotateLayer('x', 'left', 1),
-      d: () => rotateLayer('x', 'left', -1),
-      f: () => rotateLayer('y', 'top', 1),
-      j: () => rotateLayer('y', 'top', -1),
-      g: () => rotateLayer('z', 'front', -1),
-      h: () => rotateLayer('z', 'front', 1),
-      i: () => rotateLayer('x', 'right', 1),
-      k: () => rotateLayer('x', 'right', -1),
-      s: () => rotateLayer('y', 'bot', -1),
-      l: () => rotateLayer('y', 'bot', 1),
-      '5': () => rotateLayer('x', 'mid', -1),
-      '6': () => rotateLayer('x', 'mid', -1),
-      x: () => rotateLayer('x', 'mid', 1),
-      '.': () => rotateLayer('x', 'mid', 1)
-    }
+      // Back face (z axis)
+      b: () => rotateLayer('z', 'back', 1),
+      B: () => rotateLayer('z', 'back', -1),
 
+      // Up face (y axis)
+      u: () => rotateLayer('y', 'top', 1),
+      U: () => rotateLayer('y', 'top', -1),
+
+      // Down face (y axis)
+      d: () => rotateLayer('y', 'bot', 1),
+      D: () => rotateLayer('y', 'bot', -1),
+
+      // Right face (x axis)
+      r: () => rotateLayer('x', 'right', 1),
+      R: () => rotateLayer('x', 'right', -1),
+
+      // Left face (x axis)
+      l: () => rotateLayer('x', 'left', 1),
+      L: () => rotateLayer('x', 'left', -1),
+
+      // Middle slice (x axis), between left and right
+      m: () => rotateLayer('x', 'mid', 1),
+      M: () => rotateLayer('x', 'mid', -1),
+
+      // Rotate the cube
+      x: () => rotateLayer('x', 'cube', 1),
+      X: () => rotateLayer('x', 'cube', -1),
+
+      // Rotate the cube
+      y: () => rotateLayer('y', 'cube', 1),
+      Y: () => rotateLayer('y', 'cube', -1),
+
+      // Rotate the cube
+      z: () => rotateLayer('z', 'cube', 1),
+      Z: () => rotateLayer('z', 'cube', -1),
+    };
     const handleKeyDown = (event) => {
-      const action = keyMap[event.key.toLowerCase()]
+      const action = keyMap[event.key]; // Use event.key directly
       if (action) {
-        event.preventDefault()
-        action()
+        event.preventDefault();
+        action();
       }
-    }
+    };
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
