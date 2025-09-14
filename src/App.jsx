@@ -23,7 +23,7 @@ export default function App() {
         <Canvas className="w-full h-full" camera={{ position: [5, 5, 5], fov: 50 }}>
           <Environment preset="apartment" />
           <OrbitControls />
-          <group scale={1.5}>
+          <group scale={1.2}>
             <Cube pieceRefs={pieceRefs} />
           </group>
           <group position={[0, -6, 5]} rotation={[-1 / 4 * Math.PI, 0, 0]}>
