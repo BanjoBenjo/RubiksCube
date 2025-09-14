@@ -8,6 +8,8 @@ import { useAlgorithmInterpreter } from './components/Cube/useAlgorithmInterpret
 import { useCubeKeyboardControls } from './components/Cube/useCubeKeyboardControls'
 import Keyboard from './components/Keyboard/Keyboard'
 
+
+// ready for portfolio
 export default function App() {
   const pieceRefs = useRef([])
   const { rotateLayer } = useRubiksCubeController(pieceRefs)
